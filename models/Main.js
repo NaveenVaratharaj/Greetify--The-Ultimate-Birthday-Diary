@@ -5,26 +5,24 @@ const LocalStrategy = require("passport-local")
 const passportLocalMongoose = require("passport-local-mongoose")
 
 // Connecting to the DB
-mongoose.connect("mongodb://localhost:27017/JournlDB",  { useUnifiedTopology:true});
+mongoose.connect("mongodb://localhost:27017/birthdayPlanner",  { useUnifiedTopology:true});
 
 
 // Creation of schema
-const userSchema = new mongoose.Schema({
-    username:{
-        type: String
-    }, 
+const userSchema = new mongoose.Schema({ 
     email: {
         type: String
     }, 
     password: {
         type: String
-    }, 
-    products: {
-        type: String
     },
-    cart:{
-        type: Number
-    }
+    birthdays:[
+        {
+            person_name: String,
+            date: Date,
+            relType: String
+        }
+    ]
 });
 
 userSchema.pre("save", function(next) {

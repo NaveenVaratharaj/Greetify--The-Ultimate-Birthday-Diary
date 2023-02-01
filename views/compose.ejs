@@ -1,48 +1,42 @@
 <%- include("partials/header_1") -%>
 
-<h2 id="text_Top">Write your memories here without saying who you are! 🧐</h2>
+<h2 id="login_heading">Add Birthdays of your closest ones⚡</h2>
 
-<div class="form-width container">
+<div class="login user_login container">
     <form action="/compose" method="post">
-      <div class="form-group mb-4">
-        <label for="">Title</label>
-        <input type="text" class="form-control" name="postTitle" />
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="name" placeholder="name" name="personName">
+        <label for="name">Person Name</label>
       </div>
       
-      <div class="form-group mb-4">
-        <label for="">Date</label>
-        <input type="text" class="form-control" name="form-date" disabled value="<%= todayDate %>"/>
+      <div class="form-floating mb-3">
+        <input type="date" class="form-control" id="date" placeholder="date" name="birthdayDate" >
+        <label for="date">Date of Birth</label>
       </div>
 
-      <div class="form-group mb-4">
-        <label for="sel1" class="form-label">The moment was</label>
-        <select class="form-select form-control" id="sel1" name="feedBack">
-          <option selected>🤗 Memorable!</option>
-          <option>😄 Happy!</option>
-          <option>😂 Funny!</option>
-          <option>😯 Wow!</option>
-          <option>😡 Angry!</option>
-          <option>😢 Sad!</option>
-          <option>❤️ Love!</option>
-          <option>😞 Disappointment!</option>
-          <option>🤡 Embarrassment!</option>
-        </select>
-      </div>
-  
-      <div class="form-group mb-4">
-        <label for="">Describe It</label>
-        <textarea
-          type="text"
-          class="form-control"
-          name="postBody"
-          rows="4"
-          cols="30"
-        ></textarea>
-      </div>
-      <div class="but">
-        <button class="btn btn-success btn-md" type="submit " name="buton ">
-          Publish your memory
+      <select class="form-select form-select-md mb-3" name="relType" aria-label=".form-select-lg example" >
+        <option selected>Relationship Type</option>
+        <option value="Friend">Friend</option>
+        <option value="Son">Son</option>
+        <option value="Daughter">Daughter</option>
+        <option value="Relative">Relative</option>
+        <option value="Cousin">Cousin</option>
+        <option value="Brother">Brother</option>
+        <option value="Sister">Sister</option>
+        <option value="Teacher">Teacher</option>
+        <option value="Other">Other</option>
+
+
+      </select>
+
+      <div class="button_save">
+        <button class="btn btn-danger btn-md" type="submit " name="buton ">
+          Save Birthday!
         </button>
       </div>
     </form>
-  </div>
+</div>
+
+
+
+

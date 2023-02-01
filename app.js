@@ -9,6 +9,25 @@ const session = require("express-session");
 const User = require("./models/Main");
 var cookieParser = require("cookie-parser");
 const saltRounds = 6;
+var userFound = ""
+
+
+//Date Generation
+var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; 
+    var yyyy = today.getFullYear();
+    if(dd<10) 
+    {
+        dd='0'+dd;
+    } 
+    
+    if(mm<10) 
+    {
+        mm='0'+mm;
+    } 
+today = mm+'-'+dd+'-'+yyyy;
+
 
 const app = express();
 
@@ -47,32 +66,6 @@ var sessionChecker = (req, res, next) => {
   }
 };
 
-//Journal Schema
-const journalSchema = new mongoose.Schema({
-  title: String,
-  content: String,
-  feedback: String,
-  date: String
-});
-
-const Journal = mongoose.model("Journal", journalSchema);
-
-//Date value Generation
-var today = new Date();
-    var dd = today.getDate();
-    var mm = today.getMonth()+1; 
-    var yyyy = today.getFullYear();
-    if(dd<10) 
-    {
-        dd='0'+dd;
-    } 
-    
-    if(mm<10) 
-    {
-        mm='0'+mm;
-    } 
-    today = mm+'-'+dd+'-'+yyyy;
-
 app.get("/", sessionChecker, (req, res) => {
   res.render("home");
 });
@@ -86,7 +79,6 @@ app
   .post((req, res) => {
 
     var user = new User({
-      username: req.body.username,
       email: req.body.email,
       password:req.body.password,
     });
@@ -96,7 +88,7 @@ app
       } else {
           console.log(docs)
         req.session.user = docs;
-        res.redirect("/main");
+        res.render("signin");
       }
     });
   });
@@ -123,68 +115,84 @@ app
         });
         req.session.user = user;
         res.redirect("/main");
+        var foundUser = req.session.user.email
+        userFound = foundUser
+
     } catch (error) {
       console.log(error)
     }
-  });
-  text="Welcome back user 👋 Scroll down for memories ⚡";
+});
+
 
 
 // route for user's dashboard
 app.get("/main", (req, res) => {
   if (req.session.user && req.cookies.user_sid) {
-    Journal.find({}, (err,result) => {
+    User.findOne({email: userFound}, (err,docs) =>{ 
       if(err){
         console.log(err)
-      }
-      else{
-        res.render("main", {memories: result})
+      } else{
+        var birthdayDetails = docs.birthdays;
+        console.log(birthdayDetails)
+        res.render("main", {finalDetails: birthdayDetails })
       }
     })
-  } else {
-    res.redirect("/signin");
   }
-});
+  else{
+    res.render("signin")
+  }
+})
 
-
-//Route for compose page
-app.get("/compose", (req, res) => {
+// Compose
+app.get("/compose",(req,res) =>{
   if (req.session.user && req.cookies.user_sid) {
-    res.render("compose", {todayDate:today});
-  } else {
-    res.redirect("/signin");
+    res.render("compose")
+  } else{
+    res.redirect("/signin")
   }
-});
+})
 
-// Post Compose
-app.post("/compose", function(req, res) {   
-  const journ = new Journal({
-      title: req.body.postTitle,
-      content: req.body.postBody,
-      feedback:req.body.feedBack,
-      date: today
-    });
+app.get("/birthdays",(req,res) =>{
+  if (req.session.user && req.cookies.user_sid) {
+    res.render("birthdays")
+  } else{
+    res.redirect("/signin")
+  }
+})
 
-    journ.save(function(err){
-      if (!err){
-          res.redirect("/main");
+app.post("/compose", (req,res) =>{
+  var details = {
+    person_name: req.body.personName,
+    date: req.body.birthdayDate,
+    relType: req.body.relType
+  }
+
+  User.findOne({email: userFound}, (err,docs) =>{
+    if(err){
+      console.log(err)
+    }
+    else{
+      try{
+        console.log(docs.birthdays)
+        docs.birthdays.push(details)
+        docs.save()
+        console.log(docs)
       }
-    });
+      catch (e){
+        if(e instanceof TypeError){
+          console.log("Error catched")
+        }
+        else{
+          console.log(e)
+        }
+      }
+    }
 
-});
-
-
-app.get("/secrets/:postId", function(req, res){
-
-  const requestedPostId = req.params.postId;
-    Journal.findOne({_id: requestedPostId}, function(err, jour){
-      res.render("secrets", {
-        title: jour.title,
-        content: jour.content
-      });
-    });
-
-  });
+    console.log(docs)
+    res.render("main", {finalDetails: docs.birthdays })
+  })
+  
+})
 
 // route for user logout
 app.get("/signout", (req, res) => {
@@ -192,10 +200,17 @@ app.get("/signout", (req, res) => {
     res.clearCookie("user_sid");
     res.redirect("/");
   } else {
-    res.redirect("/signin");
+    res.redirect("/");
   }
 });
 
+app.get("/new", (req,res) =>{
+  res.render("new.ejs")
+})
+
+app.get("/about", (req,res) =>{
+  res.render("about.ejs")
+})
 
 app.listen(8000, ()=>{
     console.log("App started at the port 8000");
